@@ -21,7 +21,8 @@ postsRouter
         const knexInstance = req.app.get('db');
         PostsService.getAllPosts(knexInstance)
             .then(posts => {
-                res.json(posts.map(serializePost))
+                console.log(posts.map(serializePost))
+                // res.json(posts.map(serializePost))
             })
             .catch(next);
     })
