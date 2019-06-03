@@ -18,6 +18,11 @@ const PostsService = {
         return knex('dog_posts')
             .where({ id })
             .delete()
+    },
+    updatePost(knex, id, newPostFields) {
+        return knex('dog_posts')
+            .where({ id })
+            .update(newPostFields)
     }
 }
 

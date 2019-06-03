@@ -6,5 +6,6 @@ CREATE TABLE dog_posts (
     email TEXT NOT NULL UNIQUE,
     breed TEXT NOT NULL,
     birthdate DATE NOT NULL,
-    lifestyle TEXT NOT NULL
+    lifestyle TEXT NOT NULL,
+    owner INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL
 );

@@ -18,7 +18,7 @@ const serializeUser = user => ({
 usersRouter 
     .route('/')
     .post(jsonParser, (req, res, next) => {
-        const { first_name, last_name, email} = req.body
+        const { first_name, last_name, email, password} = req.body
         const newUser = { first_name, last_name, email }
 
         for (const [key, value] of Object.entries(newUser))
@@ -26,6 +26,9 @@ usersRouter
                 return res.status(400).json({
                     error: { message: `Missing '${key}' in body request`}
                 });
+            
+            newUser.email = email;
+            newUser.password = password;
             
             UsersService.insertUser(req.app.get('db'), newUser)
                 .then(user => {
@@ -37,4 +40,57 @@ usersRouter
                 .catch(next);
     })
 
+    usersRouter
+        .route('/:user_id')
+        .all((req, res, next) => {
+            UsersService.getById(
+                req.app.get('db'),
+                req.params.user_id
+            )
+                .then(user => {
+                    if (!user) {
+                        return res.status(404).json({
+                            error: { message: `User does not exist`}
+                        })
+                    }
+                    res.user = user
+                    next()
+                })
+                .catch(next)
+        })
+        .get((req, res, next) => {
+            res.json(serializeUser(res.user))
+        })
+        .delete((req, res, next) => {
+            UsersService.deleteUser(
+                req.app.get('db'),
+                req.params.user_id
+            )
+                .then(numRowsAffected => {
+                    res.status(204).end()
+                })
+                .catch(next)
+        })
+        .patch(jsonParser, (req, res, next) => {
+            const { first_name, last_name, password } = req.body
+            const userToUpdate = { first_name, last_name, password}
+
+            const numberOfValues = Object.values(userToUpdate).filter(Boolean).length
+            if (numberOfValues === 0)
+                return res.status(400).json({
+                    error: {
+                        message: `Request body must contain 'firstname', 'lastname', 'email', 'password'`
+                    }
+                })
+
+            UsersService.updateUser(
+                req.app.get('db'),
+                req.params.user_id,
+                userToUpdate
+            )
+                .then(numRowsAffected => {
+                    res.status(204).end()
+                })
+                .catch(next)
+        })
     module.exports = usersRouter

@@ -12,7 +12,8 @@ const serializePost = post => ({
     email: xss(post.email),
     breed: xss(post.breed),
     birthdate: post.birthdate,
-    lifestyle: xss(post.lifestyle)
+    lifestyle: xss(post.lifestyle),
+    owner: post.owner
 })
 
 postsRouter 
@@ -26,7 +27,7 @@ postsRouter
             .catch(next);
     })
     .post(jsonParser, (req, res, next) => {
-        const { dog_name, email, breed, birthdate, lifestyle } = req.body
+        const { dog_name, email, breed, birthdate, lifestyle, owner } = req.body
         const newPost = { dog_name, email, breed, birthdate, lifestyle}
 
         for (const [key, value] of Object.entries(newPost))
@@ -34,7 +35,7 @@ postsRouter
                 return res.status(400).json({
                     error: { message: `Missing '${key}' in body request`}
                 });
-            
+            newPost.owner = owner
             PostsService.insertPost(req.app.get('db'), newPost)
                 .then(post => {
                     res
@@ -44,5 +45,55 @@ postsRouter
                 })
                 .catch(next);
     })
+
+    postsRouter
+        .route('/:post_id')
+        .all((req, res, next) => {
+            const knexInstance = req.app.get('db');
+            PostsService.getById(knexInstance, req.params.post_id)
+                .then(post => {
+                    if (!post) {
+                        return res.status(404).json({
+                            error:{ message: `Post doesn't exist` }
+                        })
+                    }
+                    res.post = post
+                    next()
+                })
+                .catch(next)
+        })
+        .get((req, res, next) => {res.json(serializePost(res.post))})
+        .delete((req, res, next) => {
+            PostsService.deletePost(
+                req.app.get('db'),
+                req.params.post_id
+            )
+                .then(() => {
+                    res.status(204).end()
+                })
+                .catch(next)
+        })
+        .patch(jsonParser, (req,res, next) => {
+            const { dog_name, email, breed, birthdate, lifestyle } = req.body
+            const postToUpdate= { dog_name, email, breed, birthdate, lifestyle}
+
+            const numberOfValues = Object.values(postToUpdate).filter(Boolean).length
+            if (numberOfValues === 0)
+                return res.status(400).json({
+                    error: {
+                        message: `Request must contain either 'dog name', 'email', 'breed', 'birthdate', 'lifestyle'`
+                    }
+                })
+            
+            PostsService.updatePost(
+                req.app.get('db'),
+                req.params.post_id,
+                postToUpdate
+            )
+                .then(numRowsAffected => {
+                    res.status(204).end()
+                })
+                .catch(next)
+        })
 
     module.exports = postsRouter

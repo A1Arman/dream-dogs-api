@@ -1,9 +1,10 @@
 const knex = require('knex');
-const app = require('../src/app')
+const app = require('../src/app');
 const {
     makeDogPostArray,
     makeMaliciousPost
-} = require('./dream-dogs.fixtures.js')
+} = require('./dream-dogs.fixtures.js');
+const { makeUserArray } = require('./users.fixtures');
 
 describe('Posts Endpoints', () => {
     let db;
@@ -32,10 +33,15 @@ describe('Posts Endpoints', () => {
         });
 
         context('given there are posts in the database', () => {
+            const testUsers = makeUserArray();
             const testPosts = makeDogPostArray();
-            console.log(testPosts)
+
             beforeEach('insert posts', () => {
-                return db.into('dog_posts').insert(testPosts);
+                return db.into('dog_posts').insert(testUsers).then(() => {
+                    return db
+                        .into('dog_posts')
+                        .insert(testPosts)
+                });
             });
 
             it('responds with 200 and all of the posts', () => {
@@ -46,22 +52,26 @@ describe('Posts Endpoints', () => {
         });
 
         context(`Given an XSS attack post`, () => {
+            const testUsers = makeUsersArray();
             const { maliciousPost, expectedPost } = makeMaliciousPost();
 
             beforeEach('insert malicious post', () => {
-                return db.into('dog_posts').insert([maliciousPost]);
+                return db.into('dog_posts').insert(testUsers).then(() => {
+                    return db
+                        .into('dog_posts')
+                        .insert([ maliciousPost ])
+                });
             });
 
-            it('removes XSS attack', () => {
+            it('removes XSS attack content', () => {
                 return supertest(app)
                     .get(`/api/posts`)
                     .expect(200)
                     .expect(res => {
-                        console.log(res.body[0]);
-                        // expect(unescape(res.body[0].dog_name)).to.eql(expectedPost.dog_name);
-                        // expect(res.body[0].email).to.eql(expectedPost.email);
-                        // expect(res.body[0].breed).to.eql(expectedPost.breed);
-                        // expect(res.body[0].lifestyle).to.eql(expectedPost.lifestyle);
+                        expect(unescape(res.body[0].dog_name)).to.eql(expectedPost.dog_name);
+                        expect(res.body[0].email).to.eql(expectedPost.email);
+                        expect(res.body[0].breed).to.eql(expectedPost.breed);
+                        expect(res.body[0].lifestyle).to.eql(expectedPost.lifestyle);
                     });
             });
         });
