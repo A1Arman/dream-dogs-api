@@ -2,6 +2,7 @@ const path = require('path')
 const express = require('express')
 const xss = require('xss')
 const PostsService = require('./posts-service')
+const { requireAuth } = require('../middleware/auth')
 
 const postsRouter = express.Router()
 const jsonParser = express.json()
@@ -26,16 +27,18 @@ postsRouter
             })
             .catch(next);
     })
-    .post(jsonParser, (req, res, next) => {
-        const { dog_name, email, breed, birthdate, lifestyle, owner } = req.body
-        const newPost = { dog_name, email, breed, birthdate, lifestyle}
+    .post(requireAuth, jsonParser, (req, res, next) => {
+        const owner = req.user.id;
+        const { dog_name, email, breed, birthdate, lifestyle} = req.body
+        const newPost = { dog_name, email, breed, birthdate, lifestyle, owner}
 
         for (const [key, value] of Object.entries(newPost))
             if (value == null)
                 return res.status(400).json({
                     error: { message: `Missing '${key}' in body request`}
                 });
-            newPost.owner = owner
+
+
             PostsService.insertPost(req.app.get('db'), newPost)
                 .then(post => {
                     res
@@ -45,6 +48,18 @@ postsRouter
                 })
                 .catch(next);
     })
+
+    postsRouter
+        .route('/myPost')
+        .get(requireAuth, (req, res, next) => {
+            const owner = req.user.id;
+            console.log(owner)
+            PostsService.getByOwnerId(req.app.get('db'), owner)
+                .then(posts => {
+                    res.json(posts.map(serializePost))
+                })
+                .catch(next);
+        })
 
     postsRouter
         .route('/:post_id')
@@ -63,7 +78,7 @@ postsRouter
                 .catch(next)
         })
         .get((req, res, next) => {res.json(serializePost(res.post))})
-        .delete((req, res, next) => {
+        .delete(requireAuth, (req, res, next) => {
             PostsService.deletePost(
                 req.app.get('db'),
                 req.params.post_id
@@ -73,7 +88,7 @@ postsRouter
                 })
                 .catch(next)
         })
-        .patch(jsonParser, (req,res, next) => {
+        .patch(requireAuth, jsonParser, (req,res, next) => {
             const { dog_name, email, breed, birthdate, lifestyle } = req.body
             const postToUpdate= { dog_name, email, breed, birthdate, lifestyle}
 

@@ -15,6 +15,9 @@ const UsersService = {
           .where('id', id)
           .first()
     },
+    getAllUsers(knex) {
+        return knex.select('*').from('users')
+    },
     deleteUser(knex, id) {
         return knex('users')
             .where({ id })

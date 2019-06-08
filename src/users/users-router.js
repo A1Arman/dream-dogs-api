@@ -2,7 +2,7 @@ const path = require('path')
 const express = require('express')
 const xss = require('xss')
 const UsersService = require('./users-service')
-
+const { requireAuth } = require('../middleware/auth')
 const usersRouter = express.Router()
 const jsonParser = express.json()
 
@@ -11,15 +11,16 @@ const serializeUser = user => ({
     id: user.id,
     first_name: xss(user.first_name),
     last_name: xss(user.last_name),
-    email: xss(user.email)
+    email: xss(user.email),
+    password: user.password
 })
 
 
 usersRouter 
     .route('/')
     .post(jsonParser, (req, res, next) => {
-        const { first_name, last_name, email, password} = req.body
-        const newUser = { first_name, last_name, email }
+        const { first_name, last_name, email, password } = req.body
+        const newUser = { first_name, last_name, email, password }
 
         for (const [key, value] of Object.entries(newUser))
             if (value == null)
@@ -39,13 +40,28 @@ usersRouter
                 })
                 .catch(next);
     })
+    .get(requireAuth, (req, res, next) => {
+        UsersService.getAllUsers(
+            req.app.get('db')
+        )
+            .then(user => {
+                if (!user) {
+                    return res.status(404).json({
+                        error: {message: `User does not exist`}
+                    })
+                }
+                res.json(user)
+                next()
+            })
+            .catch(next)
+    })
 
     usersRouter
-        .route('/:user_id')
-        .all((req, res, next) => {
+        .route('/user')
+        .all(requireAuth, (req, res, next) => {
             UsersService.getById(
                 req.app.get('db'),
-                req.params.user_id
+                req.user.id
             )
                 .then(user => {
                     if (!user) {
@@ -58,22 +74,35 @@ usersRouter
                 })
                 .catch(next)
         })
-        .get((req, res, next) => {
-            res.json(serializeUser(res.user))
+        .get(requireAuth, (req, res, next) => {
+            UsersService.getById(
+                req.app.get('db'),
+                req.user.id
+            )
+                .then(user => {
+                    if (!user) {
+                        return res.status(404).json({
+                            error: { message: `User does not exist`}
+                        })
+                    }
+                    res.json(user)
+                    next()
+                })
+                .catch(next)
         })
-        .delete((req, res, next) => {
+        .delete(requireAuth, (req, res, next) => {
             UsersService.deleteUser(
                 req.app.get('db'),
-                req.params.user_id
+                req.user.id
             )
                 .then(numRowsAffected => {
                     res.status(204).end()
                 })
                 .catch(next)
         })
-        .patch(jsonParser, (req, res, next) => {
-            const { first_name, last_name, password } = req.body
-            const userToUpdate = { first_name, last_name, password}
+        .patch(requireAuth, jsonParser, (req, res, next) => {
+            const { first_name, last_name, email, password } = req.body
+            const userToUpdate = { first_name, last_name, email, password}
 
             const numberOfValues = Object.values(userToUpdate).filter(Boolean).length
             if (numberOfValues === 0)
@@ -85,7 +114,7 @@ usersRouter
 
             UsersService.updateUser(
                 req.app.get('db'),
-                req.params.user_id,
+                req.user.id,
                 userToUpdate
             )
                 .then(numRowsAffected => {
