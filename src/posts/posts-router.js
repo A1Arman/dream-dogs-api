@@ -88,8 +88,8 @@ postsRouter
                 .catch(next)
         })
         .patch(requireAuth, jsonParser, (req,res, next) => {
-            const { dog_name, email, breed, birthdate, lifestyle } = req.body
-            const postToUpdate= { dog_name, email, breed, birthdate, lifestyle}
+            const { dog_name, email, breed, lifestyle } = req.body
+            const postToUpdate= { dog_name, email, breed, lifestyle}
 
             const numberOfValues = Object.values(postToUpdate).filter(Boolean).length
             if (numberOfValues === 0)

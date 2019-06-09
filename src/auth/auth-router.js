@@ -15,7 +15,7 @@ authRouter
                     error: `Missing '${key}' in request body`
                 })
         
-
+        console.log(loginUser)
         AuthService.getUserWithEmail(
             req.app.get('db'),
             loginUser.email
@@ -35,6 +35,7 @@ authRouter
                         const sub = dbUser.email
                         const payload = { user_id: dbUser.id }
                         const jwt = AuthService.createJwt(sub, payload)
+                        console.log(jwt)
                         res.send({authToken: jwt})
                     })
             })
