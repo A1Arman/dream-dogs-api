@@ -7,28 +7,29 @@ function requireAuth(req, res, next) {
     if(!authToken.toLowerCase().startsWith('bearer ')) {
         return res.status(401).json({ error: 'missing token'})
     } else {
-        basicToken = authToken.slice('bearer '.length, authToken.length)
+        basicToken = authToken.slice(7, authToken.length, authToken.length)
     }
 
-    const [tokenEmail, tokenPassword] = AuthService.parseToken(basicToken)
+    try {
+        const payload = AuthService.verifyJwt(basicToken)
 
-  
-    if (!tokenEmail || !tokenPassword ) {
-        return res.status(401).json({error: 'Unauthorized request'})
+        AuthService.getUserWithEmail(
+            req.app.get('db'),
+            payload.sub
+        )
+            .then(user => {
+                if (!user)
+                    return res.status(401).json({ error:  'Unauthorized request'})
+        
+                req.user = user
+                next()
+            })
+            .catch(err => {
+                next(err)
+            })
+    } catch(error) {
+        res.status(401).json({ error: 'Unauthorized request'})
     }
-    
-    AuthService.getUserWithEmail(
-        req.app.get('db'),
-        tokenEmail
-    )
-        .then(user => {
-            if (!user || user.password !== tokenPassword) {
-                return res.status(401).json({ error:  'Unauthorized request'})
-            }
-            req.user = user
-            next()
-        })
-        .catch(next)
 }
 
 module.exports = {

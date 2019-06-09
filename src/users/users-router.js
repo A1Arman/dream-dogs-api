@@ -20,25 +20,46 @@ usersRouter
     .route('/')
     .post(jsonParser, (req, res, next) => {
         const { first_name, last_name, email, password } = req.body
-        const newUser = { first_name, last_name, email, password }
 
-        for (const [key, value] of Object.entries(newUser))
-            if (value == null)
+        for (const [key, value] of ['first_name', 'last_name', 'email', 'password'])
+            if (!req.body[field])
                 return res.status(400).json({
                     error: { message: `Missing '${key}' in body request`}
                 });
+
+            const passwordError = UsersService.validatePassword(password)
             
-            newUser.email = email;
-            newUser.password = password;
+           if (passwordError)
+                return res.status(400).json({ error: passwordError })
             
-            UsersService.insertUser(req.app.get('db'), newUser)
-                .then(user => {
-                    res
-                        .status(201)
-                        .location(path.posix.join(req.originalUrl, `/${user.id}`))
-                        .json(serializeUser(user))
-                })
-                .catch(next);
+
+            UsersService.hasUserWithEmail(
+                req.app.get('db'),
+                email
+            )
+                .then(hasUserWithEmail => {
+                    if (hasUserWithEmail)
+                        return res.status(400).json({ error: `Email in use`})
+                    
+                    return UsersService.hashPassword(password)
+                        .then(hashedPassword => {
+                            const newUser = {
+                                email,
+                                password: hashedPassword,
+                                first_name,
+                                last_name,
+                            }
+
+                            return UsersService.insertUser(req.app.get('db'), newUser)
+                                .then(user => {
+                                    res
+                                        .status(201)
+                                        .location(path.posix.join(req.originalUrl, `/${user.id}`))
+                                        .json(serializeUser(user))
+                                })
+                        }) 
+                    })
+                .catch(next)        
     })
     .get(requireAuth, (req, res, next) => {
         UsersService.getAllUsers(

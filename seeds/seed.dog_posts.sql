@@ -19,7 +19,7 @@ VALUES
         ),
         (
             'Harley',
-            'armanibhimani99@gmail.com',
+            'jilljanice99@gmail.com',
             'German Sheperd Mix',
             '2016-02-14',
             'Big dog that needs a big yard. He needs plenty of exercise to keep him out of trouble and healthy. He will do well with experienced owners.',
