@@ -21,10 +21,10 @@ usersRouter
     .post(jsonParser, (req, res, next) => {
         const { first_name, last_name, email, password } = req.body
 
-        for (const [key, value] of ['first_name', 'last_name', 'email', 'password'])
+        for (const field of ['first_name', 'last_name', 'email', 'password'])
             if (!req.body[field])
                 return res.status(400).json({
-                    error: { message: `Missing '${key}' in body request`}
+                    error: { message: `Missing '${field}' in body request`}
                 });
 
             const passwordError = UsersService.validatePassword(password)
