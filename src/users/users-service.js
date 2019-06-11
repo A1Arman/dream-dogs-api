@@ -4,7 +4,7 @@ const REGEX_UPPER_LOWER_NUMBER_SPECIAL = /(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*
 
 const UsersService = {
     hasUserWithEmail(db, email) {
-        return db('sers')
+        return db('users')
           .where({ email })
           .first()
           .then(email => !!email)

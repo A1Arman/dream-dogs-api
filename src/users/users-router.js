@@ -26,12 +26,11 @@ usersRouter
                 return res.status(200).json({
                     error: { message: `Missing '${field}' in body request`}
                 });
-
-            const passwordError = UsersService.validatePassword(password)
             
+            const passwordError = UsersService.validatePassword(password)
+
            if (passwordError)
                 return res.status(400).json({ error: passwordError })
-            
 
             UsersService.hasUserWithEmail(
                 req.app.get('db'),
@@ -49,9 +48,10 @@ usersRouter
                                 first_name,
                                 last_name,
                             }
-
+                            console.log(newUser)
                             return UsersService.insertUser(req.app.get('db'), newUser)
                                 .then(user => {
+                                    console.log(user)
                                     res
                                         .status(201)
                                         .location(path.posix.join(req.originalUrl, `/${user.id}`))
