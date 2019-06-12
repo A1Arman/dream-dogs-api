@@ -48,10 +48,8 @@ usersRouter
                                 first_name,
                                 last_name,
                             }
-                            console.log(newUser)
                             return UsersService.insertUser(req.app.get('db'), newUser)
                                 .then(user => {
-                                    console.log(user)
                                     res
                                         .status(201)
                                         .location(path.posix.join(req.originalUrl, `/${user.id}`))

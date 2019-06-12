@@ -29,7 +29,8 @@ postsRouter
     })
     .post(requireAuth, jsonParser, (req, res, next) => {
         const owner = req.user.id;
-        const { dog_name, email, breed, birthdate, lifestyle} = req.body
+        const email = req.user.email;
+        const { dog_name, breed, birthdate, lifestyle} = req.body
         const newPost = { dog_name, email, breed, birthdate, lifestyle, owner}
 
         for (const [key, value] of Object.entries(newPost))
