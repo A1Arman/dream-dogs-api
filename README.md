@@ -1,26 +1,62 @@
-# Express Boilerplate!
+# Dream-Dogs
 
-This is a boilerplate project used for starting new projects!
+Dream-Dogs helps owners struggling to provide for their dogs to find a safe new home.
 
-## Set up
+## Motivation
 
-Complete the following steps to start a new project (NEW-PROJECT-NAME):
+We wanted an app for dog owners going through tough times that could find a new safe loving home for their dogs.
 
-1. Clone this repository to your local machine `git clone BOILERPLATE-URL NEW-PROJECTS-NAME`
-2. `cd` into the cloned repository
-3. Make a fresh start of the git history for this project with `rm -rf .git && git init`
-4. Install the node dependencies `npm install`
-5. Move the example Environment file to `.env` that will be ignored by git and read by the express server `mv example.env .env`
-6. Edit the contents of the `package.json` to use NEW-PROJECT-NAME instead of `"name": "express-boilerplate",`
+## Screenshots
+Landing Page:
+![Image of Dream-Dogs Landing Page](https://github.com/A1Arman/Dream-Dogs-Client/blob/master/dream-dogs/src/screenshot-images/Capture.PNG)
 
-## Scripts
+Dog Posts Page:
+![Image of Dream-Dogs Dog Posts Page](https://github.com/A1Arman/Dream-Dogs-Client/blob/master/dream-dogs/src/screenshot-images/Capture1.PNG)
 
-Start the application `npm start`
+Create Dog Post Page:
+![Image of Dream-Dogs Create Post Page](https://github.com/A1Arman/Dream-Dogs-Client/blob/master/dream-dogs/src/screenshot-images/Capture3.PNG)
 
-Start nodemon for the application `npm run dev`
+My Posts Page:
+![Image of Dream-Dogs My Posts Page](https://github.com/A1Arman/Dream-Dogs-Client/blob/master/dream-dogs/src/screenshot-images/Capture4.PNG)
 
-Run the tests `npm test`
+Update Dog Post Page:
+![Image of Dream-Dogs Update Dog Post Page](https://github.com/A1Arman/Dream-Dogs-Client/blob/master/dream-dogs/src/screenshot-images/Capture5.PNG)
 
-## Deploying
+Sign Up Page:
+![Image of Dream-Dogs Sign Up Page](https://github.com/A1Arman/Dream-Dogs-Client/blob/master/dream-dogs/src/screenshot-images/Capture6.PNG)
 
-When your new project is ready for deployment, add a new Heroku application with `heroku create`. This will make a new git remote called "heroku" and you can then `npm run deploy` which will push to this remote's master branch.
+## Built With
+
+### Front-End
+- React
+- HTML
+- CSS
+
+### Back-End
+- PostgreSQL
+- Express
+- Node
+- Knex
+
+### Testing
+- Mocha
+- Chai 
+- Jest
+- Enzyme
+
+### Authentication
+- bcrypt
+- JWTs
+
+## Features
+- Create a dog post
+- Create a user profile
+- See dog posts
+- See logged in user dog posts
+- Update dog posts
+- Update user profile
+- Delete logged in users dog posts
+- Delete logged in user profile
+
+## Demo
+- [Live Demo](https://a1arman-dream-dogs.now.sh/)
