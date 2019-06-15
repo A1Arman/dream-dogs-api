@@ -26,26 +26,6 @@ app.get('/', (req, res) => {
     res.send('Hello, world!')
 })
 
-app.get('/manifest.json', (req, res) => {
-    res.json({
-        "short_name": "Dream Dogs",
-        "manifest_version": 2,
-        "version": "one",
-        "name": "Dream Dogs App",
-        "icons": [
-          {
-            "src": "dog.ico",
-            "sizes": "64x64 32x32 24x24 16x16",
-            "type": "image/x-icon"
-          }
-        ],
-        "start_url": "./index.html",
-        "display": "standalone",
-        "theme_color": "#000000",
-        "background_color": "#ffffff"
-      })
-})
-
 app.use(function errorHandler(error, req, res, next) {
     let response;
     if (NODE_ENV === 'production') {
