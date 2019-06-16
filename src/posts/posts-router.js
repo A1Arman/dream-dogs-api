@@ -30,7 +30,6 @@ postsRouter
     .post(requireAuth, jsonParser, (req, res, next) => {
         const owner = req.user.id;
         const email = req.user.email;
-        console.log(owner, email);
         const { dog_name, breed, birthdate, lifestyle} = req.body
         const newPost = { dog_name, email, breed, birthdate, lifestyle, owner}
 
